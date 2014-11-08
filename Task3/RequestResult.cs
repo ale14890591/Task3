@@ -10,6 +10,8 @@ namespace Task3
     {
         ConnectionSuccess,
         Rejection,
-        ConnectionFail
+        IsEngaged,
+        IsOff,
+        DoesntExist
     }
 }

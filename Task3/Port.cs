@@ -9,7 +9,7 @@ namespace Task3
     public class Port
     {
         private PortState _portState;
-        private Number _connectedTerminal;
+        private Number _connectedTerminalNumber;
 
         public PortState PortState
         {
@@ -22,23 +22,49 @@ namespace Task3
                 this._portState = value;
             }
         }
-
         public Number ConnectedTerminalNumber 
         {
             get 
             { 
-                return _connectedTerminal; 
+                return _connectedTerminalNumber; 
             }
             set
             {
-                this._connectedTerminal = value;
+                this._connectedTerminalNumber = value;
             }
         }
 
-        public void ConnectToTerminal(object sender, EventArgs e)
+        public event EventHandler<EventArgs> SendCallToTerminal;
+
+        public Port(Number number)
+        {
+            this._portState = Task3.PortState.Disconnected;
+            this._connectedTerminalNumber = number;
+        }
+
+        public void ConnectToTerminal()
         {
             this.PortState = Task3.PortState.Connected;
-            this.ConnectedTerminalNumber = (e as ConnectingEventArgs).Number;
+        }
+
+        public void Disconnect()
+        {
+            this.PortState = Task3.PortState.Disconnected;
+        }
+
+        public void Call(object sender, EventArgs e)
+        {
+            this.PortState = Task3.PortState.Engaged;
+            OnSendCallToTerminal(sender, e);
+        }
+
+        protected virtual void OnSendCallToTerminal(object sender, EventArgs e)
+        {
+            var temp = SendCallToTerminal;
+            if (temp != null)
+            {
+                SendCallToTerminal(sender, e);
+            }
         }
     }
 }

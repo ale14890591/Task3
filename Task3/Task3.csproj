@@ -43,6 +43,8 @@
   <ItemGroup>
     <Compile Include="Base.cs" />
     <Compile Include="CallingEventArgs.cs" />
+    <Compile Include="CallRegistry.cs" />
+    <Compile Include="CallRegistryItem.cs" />
     <Compile Include="ConnectingEventArgs.cs" />
     <Compile Include="Number.cs" />
     <Compile Include="Port.cs" />

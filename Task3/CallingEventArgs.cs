@@ -8,12 +8,14 @@ namespace Task3
 {
     public class CallingEventArgs : EventArgs
     {
-        public Number Number { get; set; }
-        public RequestResult RequestResult { get; set; } 
+        public Number DestinationNumber { get; set; }
+        public RequestResult RequestResult { get; set; }
+        public DateTime Beg { get; set; }
+        public DateTime End { get; set; }
 
         public CallingEventArgs(int number)
         {
-            this.Number = new Number(number);
+            this.DestinationNumber = new Number(number);
         }
     }
 }
