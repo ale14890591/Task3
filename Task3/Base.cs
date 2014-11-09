@@ -44,6 +44,7 @@ namespace Task3
                 temp.ConnectToTerminal();
                 (e as ConnectingEventArgs).OperationSuccess = true;
                 temp.SendCallToTerminal += (sender as Terminal).IncomingCall;
+                temp.SendEndCallToTerminal += (sender as Terminal).ReceiveEndCall;
             }
         }
 
@@ -60,8 +61,8 @@ namespace Task3
 
         public void Call(object sender, EventArgs e)
         {
-            Port temp = null;//ICompar
-            temp = this._workplace.Find(x => x.ConnectedTerminalNumber.Value == (e as CallingEventArgs).DestinationNumber.Value);
+            Port temp = null;
+            temp = this._workplace.Find(x => x.ConnectedTerminalNumber.Value == (e as CallingEventArgs).Callee.Value);
             if (temp == null)
             {
                 (e as CallingEventArgs).RequestResult = RequestResult.DoesntExist;
@@ -87,6 +88,18 @@ namespace Task3
                         }
                 }
             }
+        }
+
+        public void EndCall(object sender, EventArgs e)
+        {
+            Port caller = this._workplace.Find(x => x.ConnectedTerminalNumber.Value == (e as CallingEventArgs).Caller.Value);
+            Port callee = this._workplace.Find(x => x.ConnectedTerminalNumber.Value == (e as CallingEventArgs).Callee.Value);
+
+            (e as CallingEventArgs).End = DateTime.Now;
+            this._registry.Add(sender, e);
+            Console.WriteLine("Conversation between {0} and {1} has been finished at {2}, duration {3}", (e as CallingEventArgs).Caller, (e as CallingEventArgs).Callee, (e as CallingEventArgs).End, (e as CallingEventArgs).End - (e as CallingEventArgs).Beg);
+            caller.EndCall(sender, e);
+            callee.EndCall(sender, e);
         }
     }
 }

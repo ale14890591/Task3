@@ -19,12 +19,13 @@ namespace Task3
 
             Terminal t111 = new Terminal(Operator, 111);
             t111.Connect();
-            //t111.Disconnect();
             Terminal t112 = new Terminal(Operator, 112);
             t112.Connect();
             t112.Call(111);
+            //System.Threading.Thread.Sleep(10000);
+            t111.EndCall();
 
-            //Console.ReadKey();
+            Console.ReadKey();
         }
     }
 }

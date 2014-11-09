@@ -20,7 +20,6 @@ namespace Task3
         public event EventHandler<EventArgs> TryingToConnect;
         public event EventHandler<EventArgs> TryingToDisconnect;
         public event EventHandler<EventArgs> StartingCall;
-        public event EventHandler<EventArgs> StartedCall;
         public event EventHandler<EventArgs> FinishCall;
 
 
@@ -34,7 +33,8 @@ namespace Task3
             this.TryingToConnect += b.ConnectToPort;
             this.TryingToDisconnect += b.Disconnect;
             this.StartingCall += b.Call;
-            
+            this.FinishCall += b.EndCall;
+            Console.WriteLine("Terminal {0} created", this.Number);
         }
 
 
@@ -49,6 +49,7 @@ namespace Task3
             {
                 this._state = TerminalState.On;
             }
+            Console.WriteLine("Terminal {0} is on", this.Number);
             return args.OperationSuccess;
         }
 
@@ -60,19 +61,20 @@ namespace Task3
             {
                 this._state = TerminalState.Off;
             }
+            Console.WriteLine("Terminal {0} is off", this.Number);
             return args.OperationSuccess;
         }
 
         public void Call(int number)
         {
+            Console.WriteLine("Terminal {0} calls terminal {1}", this.Number, number);
             this._state = TerminalState.Engaged;
-            //CallingEventArgs args = new CallingEventArgs(number);
-            this._callArgs = new CallingEventArgs(number);
+            this._callArgs = new CallingEventArgs(this._number, number);
             OnStartingCall(this, this._callArgs);
             if (this._callArgs.RequestResult == RequestResult.ConnectionSuccess)
             {
                 this._callArgs.Beg = DateTime.Now;
-                OnStartedCall(this, this._callArgs);
+                Console.WriteLine("Conversation between {0} and {1} has started at {2}", this.Number, number, this._callArgs.Beg);
             }
             else
             {
@@ -82,13 +84,21 @@ namespace Task3
 
         public void IncomingCall(object sender, EventArgs e)
         {
+            Console.WriteLine("Terminal {0} receives a call from {1}", this.Number, (sender as Terminal).Number);
             this._state = TerminalState.Engaged;
             bool answer = true;
             if (answer)
             {
+                Console.WriteLine("Terminal {0} accepts the call from {1}", this.Number, (sender as Terminal).Number);
                 (e as CallingEventArgs).RequestResult = RequestResult.ConnectionSuccess;
-                this._state = TerminalState.On;
                 this._callArgs = e as CallingEventArgs;
+            }
+            else
+            {
+                Console.WriteLine("Terminal {0} rejects the call from {1}", this.Number, (sender as Terminal).Number);
+                (e as CallingEventArgs).RequestResult = RequestResult.Rejection;
+                this._callArgs = e as CallingEventArgs;
+                this._state = TerminalState.On;
             }
         }
 
@@ -96,8 +106,16 @@ namespace Task3
         {
             if (this._state == TerminalState.Engaged)
             {
+                Console.WriteLine("Terminal {0} sends end signal to {1}", this.Number, this.Number.Value == this._callArgs.Caller.Value ? this._callArgs.Callee : this._callArgs.Caller);
                 OnFinishCall(this, this._callArgs);
             }
+        }
+
+        public void ReceiveEndCall(object sender, EventArgs e)
+        {
+            this._state = TerminalState.On;
+            Console.WriteLine("Terminal {0} is off the conversation with {1}", this.Number, this.Number.Value == this._callArgs.Caller.Value ? this._callArgs.Callee : this._callArgs.Caller);
+            this._callArgs = null;
         }
 
         protected virtual void OnTryingToConnect(object sender, EventArgs e)
@@ -127,15 +145,6 @@ namespace Task3
             }
         }
 
-        protected virtual void OnStartedCall(object sender, EventArgs e)
-        {
-            var temp = StartedCall;
-            if (temp != null)
-            {
-                temp(sender, e);
-            }
-        }
-
         protected virtual void OnFinishCall(object sender, EventArgs e)
         {
             var temp = FinishCall;
@@ -149,7 +158,7 @@ namespace Task3
         {
             if (sender is Terminal && e is CallingEventArgs)
             {
-                Console.WriteLine("Calling {0}", (e as CallingEventArgs).DestinationNumber);
+                Console.WriteLine("Calling {0}", (e as CallingEventArgs).Callee);
                 (e as CallingEventArgs).RequestResult++;
             }
         }

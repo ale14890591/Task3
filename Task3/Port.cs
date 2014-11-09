@@ -35,6 +35,7 @@ namespace Task3
         }
 
         public event EventHandler<EventArgs> SendCallToTerminal;
+        public event EventHandler<EventArgs> SendEndCallToTerminal;
 
         public Port(Number number)
         {
@@ -58,12 +59,27 @@ namespace Task3
             OnSendCallToTerminal(sender, e);
         }
 
+        public void EndCall(object sender, EventArgs e)
+        {
+            this.PortState = Task3.PortState.Connected;
+            OnSendEndCallToTerminal(sender, e);
+        }
+
         protected virtual void OnSendCallToTerminal(object sender, EventArgs e)
         {
             var temp = SendCallToTerminal;
             if (temp != null)
             {
-                SendCallToTerminal(sender, e);
+                temp(sender, e);
+            }
+        }
+
+        protected virtual void OnSendEndCallToTerminal(object sender, EventArgs e)
+        {
+            var temp = SendEndCallToTerminal;
+            if (temp != null)
+            {
+                temp(sender, e);
             }
         }
     }

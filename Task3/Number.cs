@@ -14,5 +14,10 @@ namespace Task3
         {
             this.Value = number;
         }
+
+        public override string ToString()
+        {
+            return this.Value.ToString();
+        }
     }
 }

@@ -8,14 +8,16 @@ namespace Task3
 {
     public class CallingEventArgs : EventArgs
     {
-        public Number DestinationNumber { get; set; }
+        public Number Caller { get; set; }
+        public Number Callee { get; set; }
         public RequestResult RequestResult { get; set; }
         public DateTime Beg { get; set; }
         public DateTime End { get; set; }
 
-        public CallingEventArgs(int number)
+        public CallingEventArgs(Number from, int to)
         {
-            this.DestinationNumber = new Number(number);
+            this.Caller = from;
+            this.Callee = new Number(to);
         }
     }
 }
