@@ -53,11 +53,13 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="RequestResult.cs" />
     <Compile Include="Tariff.cs" />
+    <Compile Include="TarificationEventArgs.cs" />
     <Compile Include="Terminal.cs" />
     <Compile Include="TerminalState.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
+    <None Include="ClassDiagram1.cd" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

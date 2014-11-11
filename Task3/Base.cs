@@ -9,7 +9,7 @@ namespace Task3
     public class Base
     {
         private List<Port> _workplace = new List<Port>();
-        private CallRegistry _registry = new CallRegistry();
+        private CallRegistryList _registry = new CallRegistryList();
 
         public List<Port> Workplace
         {
@@ -22,7 +22,7 @@ namespace Task3
                 this._workplace = value;
             }
         }
-        public CallRegistry Registry
+        public CallRegistryList Registry
         {
             get { return _registry; }
             set { _registry = value; }
@@ -35,7 +35,21 @@ namespace Task3
             this._workplace.Add(new Port(number));
         }
 
-        public void ConnectToPort(object sender, EventArgs e)
+        public void RegisterTerminal(params Terminal[] terminal)
+        {
+            foreach (Terminal t in terminal)
+            {
+                CreatePort(t.Number);
+                t.TryingToConnect += ConnectTerminal;
+                t.TryingToDisconnect += DisconnectTerminal;
+                t.StartingCall += Call;
+                t.FinishCall += EndCall;
+                t.Register();
+                Console.WriteLine("Terminal {0} has been registrated", t.Number);
+            }
+        }
+
+        public void ConnectTerminal(object sender, EventArgs e)
         {
             Port temp = null;
             temp = this._workplace.Find(x => x.ConnectedTerminalNumber == (sender as Terminal).Number);
@@ -45,16 +59,17 @@ namespace Task3
                 (e as ConnectingEventArgs).OperationSuccess = true;
                 temp.SendCallToTerminal += (sender as Terminal).IncomingCall;
                 temp.SendEndCallToTerminal += (sender as Terminal).ReceiveEndCall;
+                temp.SendBillToTerminal += (sender as Terminal).ReceiveBill;
             }
         }
 
-        public void Disconnect(object sender, EventArgs e)
+        public void DisconnectTerminal(object sender, EventArgs e)
         {
             Port temp = null;
             temp = this._workplace.Find(x => x.ConnectedTerminalNumber == (e as ConnectingEventArgs).Number);
             if (temp != null)
             {
-                temp.Disconnect();
+                temp.DisconnectFromTerminal();
                 (e as ConnectingEventArgs).OperationSuccess = true;
             }
         }
@@ -100,6 +115,12 @@ namespace Task3
             Console.WriteLine("Conversation between {0} and {1} has been finished at {2}, duration {3}", (e as CallingEventArgs).Caller, (e as CallingEventArgs).Callee, (e as CallingEventArgs).End, (e as CallingEventArgs).End - (e as CallingEventArgs).Beg);
             caller.EndCall(sender, e);
             callee.EndCall(sender, e);
+        }
+
+        public void TarificateNumber(Number number)
+        {
+            Port temp = this._workplace.Find(x => x.ConnectedTerminalNumber.Value == number.Value);
+            temp.Tarificate(this, new TarificationEventArgs(number));
         }
     }
 }

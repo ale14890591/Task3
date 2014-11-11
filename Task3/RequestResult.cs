@@ -12,6 +12,6 @@ namespace Task3
         Rejection,
         IsEngaged,
         IsOff,
-        DoesntExist
+        DoesntExist,
     }
 }

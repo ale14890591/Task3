@@ -10,6 +10,7 @@ namespace Task3
     {
         private Number _number;
         private TerminalState _state;
+        private bool _isRegistrated;
         private CallingEventArgs _callArgs = null;
 
         public Number Number
@@ -25,60 +26,93 @@ namespace Task3
 
 
         //construstors
-        public Terminal(Base b, int number)
+        public Terminal(int number)
         {
             this._number = new Number(number);
             this._state = TerminalState.Off;
-            b.CreatePort(this._number);
-            this.TryingToConnect += b.ConnectToPort;
-            this.TryingToDisconnect += b.Disconnect;
-            this.StartingCall += b.Call;
-            this.FinishCall += b.EndCall;
+            this._isRegistrated = false;
             Console.WriteLine("Terminal {0} created", this.Number);
         }
 
+        public void Register()
+        {
+            this._isRegistrated = true;
+        }
 
+        public void Deregister()
+        {
+            this._isRegistrated = false;
+        }
 
-
-
-        public bool Connect()
+        public bool ConnectToBase()
         {
             ConnectingEventArgs args = new ConnectingEventArgs(this._number);
             OnTryingToConnect(this, args);
             if (args.OperationSuccess)
             {
                 this._state = TerminalState.On;
+                Console.WriteLine("Terminal {0} is on", this.Number);
             }
-            Console.WriteLine("Terminal {0} is on", this.Number);
             return args.OperationSuccess;
         }
 
-        public bool Disconnect()
+        public bool DisconnectFromBase()
         {
             ConnectingEventArgs args = new ConnectingEventArgs(this._number);
             OnTryingToDisconnect(this, args);
             if (args.OperationSuccess)
             {
                 this._state = TerminalState.Off;
+                Console.WriteLine("Terminal {0} is off", this.Number);
             }
-            Console.WriteLine("Terminal {0} is off", this.Number);
             return args.OperationSuccess;
         }
 
         public void Call(int number)
         {
-            Console.WriteLine("Terminal {0} calls terminal {1}", this.Number, number);
-            this._state = TerminalState.Engaged;
-            this._callArgs = new CallingEventArgs(this._number, number);
-            OnStartingCall(this, this._callArgs);
-            if (this._callArgs.RequestResult == RequestResult.ConnectionSuccess)
+            if (this._isRegistrated)
             {
-                this._callArgs.Beg = DateTime.Now;
-                Console.WriteLine("Conversation between {0} and {1} has started at {2}", this.Number, number, this._callArgs.Beg);
+                Console.WriteLine("Terminal {0} calls terminal {1}", this.Number, number);
+                this._state = TerminalState.Engaged;
+                this._callArgs = new CallingEventArgs(this._number, number);
+                OnStartingCall(this, this._callArgs);
+                switch (this._callArgs.RequestResult)
+                {
+                    case RequestResult.ConnectionSuccess:
+                        {
+                            this._callArgs.Beg = DateTime.Now;
+                            Console.WriteLine("Conversation between {0} and {1} has started at {2}", this.Number, number, this._callArgs.Beg);
+                            break;
+                        }
+                    case RequestResult.DoesntExist:
+                        {
+                            Console.WriteLine("Terminal {0} doesn't exist", number);
+                            this._state = TerminalState.On;
+                            break;
+                        }
+                    case RequestResult.IsEngaged:
+                        {
+                            Console.WriteLine("Terminal {0} is engaged", number);
+                            this._state = TerminalState.On;
+                            break;
+                        }
+                    case RequestResult.IsOff:
+                        {
+                            Console.WriteLine("Terminal {0} is off", number);
+                            this._state = TerminalState.On;
+                            break;
+                        }
+                    case RequestResult.Rejection:
+                        {
+                            Console.WriteLine("Terminal {0} has rejected your call", number);
+                            this._state = TerminalState.On;
+                            break;
+                        }
+                }
             }
             else
             {
-                this._state = TerminalState.On;
+                Console.WriteLine("Terminal {0} isn't registrated yet and can't make a call", this._number);
             }
         }
 
@@ -86,7 +120,11 @@ namespace Task3
         {
             Console.WriteLine("Terminal {0} receives a call from {1}", this.Number, (sender as Terminal).Number);
             this._state = TerminalState.Engaged;
-            bool answer = true;
+
+            Random rnd = new Random();
+            int ans = rnd.Next(2);
+
+            bool answer = ans == 1 ? true : false;
             if (answer)
             {
                 Console.WriteLine("Terminal {0} accepts the call from {1}", this.Number, (sender as Terminal).Number);
@@ -116,6 +154,11 @@ namespace Task3
             this._state = TerminalState.On;
             Console.WriteLine("Terminal {0} is off the conversation with {1}", this.Number, this.Number.Value == this._callArgs.Caller.Value ? this._callArgs.Callee : this._callArgs.Caller);
             this._callArgs = null;
+        }
+
+        public void ReceiveBill(object sender, EventArgs e)
+        {
+            Console.WriteLine("You bill for previous period is {0}", (e as TarificationEventArgs).Sum);
         }
 
         protected virtual void OnTryingToConnect(object sender, EventArgs e)
@@ -151,15 +194,6 @@ namespace Task3
             if (temp != null)
             {
                 temp(sender, e);
-            }
-        }
-
-        public void ShowCallingInfo(object sender, EventArgs e)
-        {
-            if (sender is Terminal && e is CallingEventArgs)
-            {
-                Console.WriteLine("Calling {0}", (e as CallingEventArgs).Callee);
-                (e as CallingEventArgs).RequestResult++;
             }
         }
     }

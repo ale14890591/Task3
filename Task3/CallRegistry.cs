@@ -6,10 +6,8 @@ using System.Threading.Tasks;
 
 namespace Task3
 {
-    public class CallRegistry
+    public class CallRegistryList : List<CallRegistryItem>
     {
-        public List<CallRegistryItem> _registry = new List<CallRegistryItem>();
-
         public void Add(object sender, EventArgs e)
         {
             CallRegistryItem temp = new CallRegistryItem();
@@ -18,7 +16,7 @@ namespace Task3
             temp.Beg = (e as CallingEventArgs).Beg;
             temp.End = (e as CallingEventArgs).End;
 
-            _registry.Add(temp);
+            this.Add(temp);
         }
     }
 }

@@ -18,6 +18,7 @@ namespace Task3
         {
             this.Caller = from;
             this.Callee = new Number(to);
+            this.RequestResult = Task3.RequestResult.DoesntExist;
         }
     }
 }
