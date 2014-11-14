@@ -6,16 +6,16 @@ using System.Threading.Tasks;
 
 namespace Task3
 {
-    public class TarificationEventArgs : EventArgs
+    public class TariffPeriod
     {
-        public Number Number { get; set; }
-        public int Sum { get; set; }
+        public Tariff Tariff { get; set; }
         public DateTime Beg { get; set; }
         public DateTime End { get; set; }
 
-        public TarificationEventArgs(Number number)
+        public TariffPeriod(Tariff tariff, DateTime beg)
         {
-            this.Number = number;
+            this.Tariff = tariff;
+            this.Beg = beg;
         }
     }
 }

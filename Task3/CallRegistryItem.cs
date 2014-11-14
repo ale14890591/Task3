@@ -12,5 +12,6 @@ namespace Task3
         public Number Callee { get; set; }
         public DateTime Beg { get; set; }
         public DateTime End { get; set; }
+        public int Cost { get; set; }
     }
 }

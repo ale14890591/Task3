@@ -10,6 +10,7 @@ namespace Task3
     {
         private PortState _portState;
         private Number _connectedTerminalNumber;
+        public DateTime StartPeriod { get; set; }
 
         public PortState PortState
         {
@@ -36,8 +37,6 @@ namespace Task3
 
         public event EventHandler<EventArgs> SendCallToTerminal;
         public event EventHandler<EventArgs> SendEndCallToTerminal;
-        public event EventHandler<EventArgs> Tarification;
-        public event EventHandler<EventArgs> SendBillToTerminal;
 
         public Port(Number number)
         {
@@ -57,25 +56,19 @@ namespace Task3
 
         public void Call(object sender, EventArgs e)
         {
-            this.PortState = Task3.PortState.Engaged;
-            OnSendCallToTerminal(sender, e);
+            if (this._portState == Task3.PortState.Connected)
+            {
+                this.PortState = Task3.PortState.Engaged;
+                OnSendCallToTerminal(sender, e);
+                if ((e as CallingEventArgs).RequestResult == RequestResult.Rejection)
+                    this._portState = Task3.PortState.Connected;
+            }
         }
 
         public void EndCall(object sender, EventArgs e)
         {
             this.PortState = Task3.PortState.Connected;
             OnSendEndCallToTerminal(sender, e);
-        }
-
-        public void SetTariff(Tariff t)
-        {
-            this.Tarification += t.CountDebt;
-        }
-
-        public void Tarificate(object sender, EventArgs e)
-        {
-            this.OnTarification(sender, e);
-            this.OnSendBillToTerminal(sender, e);
         }
 
         protected virtual void OnSendCallToTerminal(object sender, EventArgs e)
@@ -90,24 +83,6 @@ namespace Task3
         protected virtual void OnSendEndCallToTerminal(object sender, EventArgs e)
         {
             var temp = SendEndCallToTerminal;
-            if (temp != null)
-            {
-                temp(sender, e);
-            }
-        }
-
-        protected virtual void OnTarification(object sender, EventArgs e)
-        {
-            var temp = Tarification;
-            if (temp != null)
-            {
-                temp(sender, e);
-            }
-        }
-
-        protected virtual void OnSendBillToTerminal(object sender, EventArgs e)
-        {
-            var temp = SendBillToTerminal;
             if (temp != null)
             {
                 temp(sender, e);

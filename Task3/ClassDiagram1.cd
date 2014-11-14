@@ -1,9 +1,9 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <ClassDiagram MajorVersion="1" MinorVersion="1">
-  <Class Name="Task3.Base">
+  <Class Name="Task3.Base" Collapsed="true">
     <Position X="5.25" Y="2.25" Width="1.75" />
     <TypeIdentifier>
-      <HashCode>QAAAQAQAAAAACACAgAAAAAAACIAgAAAAAAAAAAAAAAA=</HashCode>
+      <HashCode>QAAAQARAAAAACACAgAAAAAAAGIAgAAAAAAAAAAAAEAA=</HashCode>
       <FileName>Base.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -28,31 +28,31 @@
       <FileName>ConnectingEventArgs.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Task3.Number">
+  <Class Name="Task3.Number" Collapsed="true">
     <Position X="1" Y="2.25" Width="1.5" />
     <TypeIdentifier>
       <HashCode>AAAAAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAgAAAAAAA=</HashCode>
       <FileName>Number.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Task3.Port">
+  <Class Name="Task3.Port" Collapsed="true">
     <Position X="7.5" Y="2.25" Width="2.25" />
     <TypeIdentifier>
-      <HashCode>AAAAQgAAIAAAAACAAAAAgAAAACAAAAAAAAEQAAEgACA=</HashCode>
+      <HashCode>AAAAQgBAJAgAAACAAAAAgAAAACAACAgAAIEQAAEgACA=</HashCode>
       <FileName>Port.cs</FileName>
     </TypeIdentifier>
   </Class>
   <Class Name="Task3.Tariff">
     <Position X="12" Y="5" Width="1.5" />
     <TypeIdentifier>
-      <HashCode>AAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAAgAAAAAAI=</HashCode>
+      <HashCode>AAAAAAAAAAAAAAAAAAgAAAAQAAAAAAAAAAAgAAAAAAI=</HashCode>
       <FileName>Tariff.cs</FileName>
     </TypeIdentifier>
   </Class>
-  <Class Name="Task3.Terminal">
+  <Class Name="Task3.Terminal" Collapsed="true">
     <Position X="2.75" Y="2.25" Width="2" />
     <TypeIdentifier>
-      <HashCode>AIAAQAAggAAAIECACEAACABAECAAAAAAIAAACADAAQA=</HashCode>
+      <HashCode>AIAAUAJggAAAIECACEAACABAECIFAAEAIAAACADAAQA=</HashCode>
       <FileName>Terminal.cs</FileName>
     </TypeIdentifier>
   </Class>

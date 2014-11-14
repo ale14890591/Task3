@@ -11,6 +11,7 @@ namespace Task3
         private Number _number;
         private TerminalState _state;
         private bool _isRegistrated;
+        private bool _tariffIsSet;
         private CallingEventArgs _callArgs = null;
 
         public Number Number
@@ -22,7 +23,7 @@ namespace Task3
         public event EventHandler<EventArgs> TryingToDisconnect;
         public event EventHandler<EventArgs> StartingCall;
         public event EventHandler<EventArgs> FinishCall;
-
+        public event EventHandler<EventArgs> SetTariffEvent;
 
 
         //construstors
@@ -37,11 +38,19 @@ namespace Task3
         public void Register()
         {
             this._isRegistrated = true;
+
         }
 
         public void Deregister()
         {
             this._isRegistrated = false;
+        }
+
+        public void SetTariff(Tariff t, DateTime d)
+        {
+            SetTariffEventArgs args = new SetTariffEventArgs(t, d);
+            OnSetTariffEvent(this, args);
+            this._tariffIsSet = true;
         }
 
         public bool ConnectToBase()
@@ -68,9 +77,9 @@ namespace Task3
             return args.OperationSuccess;
         }
 
-        public void Call(int number)
+        public void Call(int number, DateTime d)
         {
-            if (this._isRegistrated)
+            if (this._isRegistrated && this._tariffIsSet)
             {
                 Console.WriteLine("Terminal {0} calls terminal {1}", this.Number, number);
                 this._state = TerminalState.Engaged;
@@ -80,7 +89,8 @@ namespace Task3
                 {
                     case RequestResult.ConnectionSuccess:
                         {
-                            this._callArgs.Beg = DateTime.Now;
+                            //this._callArgs.Beg = DateTime.Now;
+                            this._callArgs.Beg = d;
                             Console.WriteLine("Conversation between {0} and {1} has started at {2}", this.Number, number, this._callArgs.Beg);
                             break;
                         }
@@ -108,11 +118,17 @@ namespace Task3
                             this._state = TerminalState.On;
                             break;
                         }
+                    case RequestResult.CallerPortIsDisconnected:
+                        {
+                            Console.WriteLine("Terminal {0} can't make a call cause it's disconnected from base", number);
+                            this._state = TerminalState.On;
+                            break;
+                        }
                 }
             }
             else
             {
-                Console.WriteLine("Terminal {0} isn't registrated yet and can't make a call", this._number);
+                Console.WriteLine("Terminal {0} isn't registrated yet or tariff isn't chosen, so it can't make a call", this._number);
             }
         }
 
@@ -122,9 +138,9 @@ namespace Task3
             this._state = TerminalState.Engaged;
 
             Random rnd = new Random();
-            int ans = rnd.Next(2);
+            int ans = rnd.Next(3);
 
-            bool answer = ans == 1 ? true : false;
+            bool answer = (ans >= 1 ? true : false);
             if (answer)
             {
                 Console.WriteLine("Terminal {0} accepts the call from {1}", this.Number, (sender as Terminal).Number);
@@ -140,10 +156,11 @@ namespace Task3
             }
         }
 
-        public void EndCall()
+        public void EndCall(DateTime d)
         {
             if (this._state == TerminalState.Engaged)
             {
+                this._callArgs.End = d;
                 Console.WriteLine("Terminal {0} sends end signal to {1}", this.Number, this.Number.Value == this._callArgs.Caller.Value ? this._callArgs.Callee : this._callArgs.Caller);
                 OnFinishCall(this, this._callArgs);
             }
@@ -154,11 +171,6 @@ namespace Task3
             this._state = TerminalState.On;
             Console.WriteLine("Terminal {0} is off the conversation with {1}", this.Number, this.Number.Value == this._callArgs.Caller.Value ? this._callArgs.Callee : this._callArgs.Caller);
             this._callArgs = null;
-        }
-
-        public void ReceiveBill(object sender, EventArgs e)
-        {
-            Console.WriteLine("You bill for previous period is {0}", (e as TarificationEventArgs).Sum);
         }
 
         protected virtual void OnTryingToConnect(object sender, EventArgs e)
@@ -191,6 +203,15 @@ namespace Task3
         protected virtual void OnFinishCall(object sender, EventArgs e)
         {
             var temp = FinishCall;
+            if (temp != null)
+            {
+                temp(sender, e);
+            }
+        }
+
+        protected virtual void OnSetTariffEvent(object sender, EventArgs e)
+        {
+            var temp = SetTariffEvent;
             if (temp != null)
             {
                 temp(sender, e);

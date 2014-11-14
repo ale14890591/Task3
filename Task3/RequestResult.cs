@@ -13,5 +13,6 @@ namespace Task3
         IsEngaged,
         IsOff,
         DoesntExist,
+        CallerPortIsDisconnected
     }
 }

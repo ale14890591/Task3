@@ -15,6 +15,7 @@ namespace Task3
             temp.Callee = (e as CallingEventArgs).Callee;
             temp.Beg = (e as CallingEventArgs).Beg;
             temp.End = (e as CallingEventArgs).End;
+            temp.Cost = (e as CallingEventArgs).Cost;
 
             this.Add(temp);
         }
