@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -67,11 +68,11 @@ namespace Task3
             {
                 if (temp.TariffPeriodList.Count == 0)
                 {
-                    temp.TariffPeriodList.Add(new TariffPeriod((e as SetTariffEventArgs).Tariff, (e as SetTariffEventArgs).StartPeriod));
+                    temp.TariffPeriodList.Add(new TariffPeriod(new Tariff((e as SetTariffEventArgs).Tariff), (e as SetTariffEventArgs).StartPeriod));
                 }
                 else
                 {
-                    temp.TariffPeriodList.Add(new TariffPeriod((e as SetTariffEventArgs).Tariff, (e as SetTariffEventArgs).StartPeriod));
+                    temp.TariffPeriodList.Add(new TariffPeriod(new Tariff((e as SetTariffEventArgs).Tariff), (e as SetTariffEventArgs).StartPeriod));
                     temp.TariffPeriodList[temp.TariffPeriodList.Count - 2].End = (e as SetTariffEventArgs).StartPeriod;
                 }
             }
@@ -183,30 +184,123 @@ namespace Task3
                 Console.WriteLine("{0} {1} {2}", c.Number.Value, d, debt);
                 c.TariffPeriodList[c.TariffPeriodList.Count - 1].Tariff.FreeIcludedIntervals = 0;
                 c.TariffPeriodList[c.TariffPeriodList.Count - 1].Tariff.FreeIcludedIntervals = 
-                    this.Tariffs.Find(x => x.Name == c.TariffPeriodList[c.TariffPeriodList.Count - 1].Tariff.Name).FreeIcludedIntervals;
+                    this.Tariffs.First(x => x.Name == c.TariffPeriodList[c.TariffPeriodList.Count - 1].Tariff.Name).FreeIcludedIntervals;
             }
         }
 
         public void TarificationByCall(CallingEventArgs e)
         {
             Contract temp = this._contractList.Find(x => x.Number.Value == e.Caller.Value);
-            if (temp.TariffPeriodList[temp.TariffPeriodList.Count - 1].Tariff.FreeIcludedIntervals > 0)
+            int duration = (e.End - e.Beg).Minutes + 1;
+            if (temp.TariffPeriodList[temp.TariffPeriodList.Count - 1].Tariff.FreeIcludedIntervals > 0 && duration <= temp.TariffPeriodList[temp.TariffPeriodList.Count - 1].Tariff.FreeIcludedIntervals)
             {
                 temp.TariffPeriodList[temp.TariffPeriodList.Count - 1].Tariff.FreeIcludedIntervals -= ((e.End - e.Beg).Minutes + 1);
-                e.Cost = 0;
             }
             else
             {
-                e.Cost = ((e.End - e.Beg).Minutes + 1) * temp.TariffPeriodList[temp.TariffPeriodList.Count - 1].Tariff.CostPerInterval;
+                duration -= temp.TariffPeriodList[temp.TariffPeriodList.Count - 1].Tariff.FreeIcludedIntervals;
+                temp.TariffPeriodList[temp.TariffPeriodList.Count - 1].Tariff.FreeIcludedIntervals = 0;
+                e.Cost = duration * temp.TariffPeriodList[temp.TariffPeriodList.Count - 1].Tariff.CostPerInterval;
+            }
+            //if (temp.TariffPeriodList[temp.TariffPeriodList.Count - 1].Tariff.FreeIcludedIntervals > 0)
+            //{
+            //    temp.TariffPeriodList[temp.TariffPeriodList.Count - 1].Tariff.FreeIcludedIntervals -= ((e.End - e.Beg).Minutes + 1);
+            //    e.Cost = 0;
+            //}
+            //else
+            //{
+            //    e.Cost = ((e.End - e.Beg).Minutes + 1) * temp.TariffPeriodList[temp.TariffPeriodList.Count - 1].Tariff.CostPerInterval;
+            //}
+        }
+
+        //public static int CountDebt(Tariff t, int sum)
+        //{
+        //    int paidDuration = 0;
+        //    if (sum >= t.FreeIcludedIntervals)
+        //        paidDuration = sum - t.FreeIcludedIntervals;
+        //    return t.CostPerInterval * paidDuration + t.PeriodFee;
+        //}
+
+        public void ShowDetailedReport(string name)
+        {
+            using (FileStream fs = new FileStream(@"C:\Report.txt", FileMode.Create))
+            {
+                using (StreamWriter w = new StreamWriter(fs, Encoding.Default))
+                {
+                    var numbers = this.ContractList.FindAll(x => x.Name == name).Select(y => y.Number);
+                    foreach (var number in numbers)
+                    {
+                        w.WriteLine("+++" + number.Value + "+++");
+                        w.WriteLine("---");
+                        var calls = this.Registry.FindAll(x => x.Caller.Value == number.Value);
+                        foreach (var c in calls)
+                        {
+                            w.Write("To {0} ", c.Callee.ToString());
+                            w.Write(c.Beg + " ");
+                            w.Write(c.End + " ");
+                            w.Write("Duration {0} ", c.End-c.Beg);
+                            w.Write("Cost {0}", c.Cost);
+                            w.WriteLine();
+                        }
+                    }
+                }
             }
         }
 
-        public static int CountDebt(Tariff t, int sum)
+        public void ShowDetailedReport(string name, DateTime beg, DateTime end)
         {
-            int paidDuration = 0;
-            if (sum >= t.FreeIcludedIntervals)
-                paidDuration = sum - t.FreeIcludedIntervals;
-            return t.CostPerInterval * paidDuration + t.PeriodFee;
+            using (FileStream fs = new FileStream(@"C:\Report.txt", FileMode.Create))
+            {
+                using (StreamWriter w = new StreamWriter(fs, Encoding.Default))
+                {
+                    var numbers = this.ContractList.FindAll(x => x.Name == name).Select(y => y.Number);
+                    foreach (var number in numbers)
+                    {
+                        w.WriteLine("+++" + number.Value + "+++");
+                        w.WriteLine("---");
+                        var calls =
+                            this.Registry.FindAll(x => x.Caller.Value == number.Value)
+                                .Where(y => y.Beg >= beg && y.Beg <= end);
+                        foreach (var c in calls)
+                        {
+                            w.Write("To {0} ", c.Callee.ToString());
+                            w.Write(c.Beg + " ");
+                            w.Write(c.End + " ");
+                            w.Write("Duration {0} ", c.End - c.Beg);
+                            w.Write("Cost {0}", c.Cost);
+                            w.WriteLine();
+                        }
+                    }
+                }
+            }
+        }
+
+        public void ShowDetailedReport(string name, int calee)
+        {
+            using (FileStream fs = new FileStream(@"C:\Report.txt", FileMode.Create))
+            {
+                using (StreamWriter w = new StreamWriter(fs, Encoding.Default))
+                {
+                    var numbers = this.ContractList.FindAll(x => x.Name == name).Select(y => y.Number);
+                    foreach (var number in numbers)
+                    {
+                        w.WriteLine("+++" + number.Value + "+++");
+                        w.WriteLine("---");
+                        var calls =
+                            this.Registry.FindAll(x => x.Caller.Value == number.Value)
+                                .Where(y => y.Callee.Value == calee);
+                        foreach (var c in calls)
+                        {
+                            w.Write("To {0} ", c.Callee.ToString());
+                            w.Write(c.Beg + " ");
+                            w.Write(c.End + " ");
+                            w.Write("Duration {0} ", c.End - c.Beg);
+                            w.Write("Cost {0}", c.Cost);
+                            w.WriteLine();
+                        }
+                    }
+                }
+            }
         }
     }
 }

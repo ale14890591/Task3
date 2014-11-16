@@ -21,8 +21,8 @@ namespace Task3
             Terminal t110 = new Terminal(110);
             Terminal t111 = new Terminal(111);
 
-
-            for (DateTime d = new DateTime(2000, 01, 01, 00, 00, 00); d <= new DateTime(2000,03,01); d = d.AddDays(1))
+            
+            for (DateTime d = new DateTime(2000, 01, 01, 00, 00, 00); d <= new DateTime(2000,05,03); d = d.AddDays(1))
             {
                 Console.WriteLine(d);
                 if (d == new DateTime(2000, 01, 01))
@@ -42,13 +42,11 @@ namespace Task3
                 DateTime dend = dbeg.AddSeconds(45);
                 t110.Call(111, dbeg);
                 t111.EndCall(dend);
-                t111.Call(110, dbeg);
-                t110.EndCall(dend);
+                t111.Call(110, dbeg.AddHours(1));
+                t110.EndCall(dend.AddHours(1).AddMinutes(10));
 
                 Operator.TarificationByDate(d);
             }
-
-            
             
             
             
@@ -73,7 +71,7 @@ namespace Task3
             //t111.Call(112); 
             //t111.EndCall(); System.Threading.Thread.Sleep(1000);
             
-
+            Operator.ShowDetailedReport("Alex");
             Console.ReadKey();
         }
     }

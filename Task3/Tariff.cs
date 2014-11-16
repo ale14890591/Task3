@@ -20,5 +20,13 @@ namespace Task3
             this.FreeIcludedIntervals = freeIncluded;
             this.PeriodFee = fee;
         }
+
+        public Tariff(Tariff t)
+        {
+            this.CostPerInterval = t.CostPerInterval;
+            this.FreeIcludedIntervals = t.FreeIcludedIntervals;
+            this.Name = t.Name;
+            this.PeriodFee = t.PeriodFee;
+        }
     }
 }

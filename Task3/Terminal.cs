@@ -138,9 +138,9 @@ namespace Task3
             this._state = TerminalState.Engaged;
 
             Random rnd = new Random();
-            int ans = rnd.Next(3);
+            int ans = rnd.Next(2);
 
-            bool answer = (ans >= 1 ? true : false);
+            bool answer = (ans == 1 ? true : false);
             if (answer)
             {
                 Console.WriteLine("Terminal {0} accepts the call from {1}", this.Number, (sender as Terminal).Number);
